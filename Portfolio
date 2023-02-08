@@ -1,0 +1,75 @@
+My portfolio 
+moving Code for a game called Roots of Humanity.
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float speed = 10f;
+    public float jumpHeight = 10f;
+    public float jumpDuration = 1f;
+
+    private Rigidbody rigidbody;
+    private bool isGrounded = true;
+    private bool isJumping = false;
+    private float jumpStartTime = 0f;
+    private float initialY;
+
+    private void Start()
+    {
+        rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        // Calculate the movement vector in the forward direction
+        Vector3 forwardMovement = transform.forward * vertical;
+
+        // Calculate the movement vector in the right direction
+        Vector3 rightMovement = transform.right * horizontal;
+
+        // Combine the two movement vectors
+        Vector3 movement = forwardMovement + rightMovement;
+
+        // Apply the combined movement vector to the rigidbody
+        rigidbody.velocity = movement * speed;
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            isJumping = true;
+            jumpStartTime = Time.time;
+            initialY = transform.position.y;
+        }
+
+        if (isJumping)
+        {
+            float t = (Time.time - jumpStartTime) / jumpDuration;
+            float height = Mathf.Lerp(0, jumpHeight, t);
+            transform.position = new Vector3(transform.position.x, initialY + height, transform.position.z);
+
+            if (t >= 1f)
+            {
+                isJumping = false;
+            }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Ground")
+        {
+            isGrounded = true;
+            isJumping = false;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Ground")
+        {
+            isGrounded = false;
+        }
+    }
+}
